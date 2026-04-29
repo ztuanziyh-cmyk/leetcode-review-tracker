@@ -4,39 +4,27 @@ import { useState } from "react";
 
 import { Badge } from "@/components/badge";
 import { Card } from "@/components/card";
+import { DataSourceBadge } from "@/components/data-source-badge";
+import { LiveSubmissionList } from "@/components/live-submission-list";
 import { StatCard } from "@/components/stat-card";
 import type { LeetCodeSyncResult } from "@/lib/leetcode";
+import {
+  clearLocalSyncResult,
+  saveLocalSyncResult,
+} from "@/lib/local-sync-storage";
+import { useLocalSyncResult } from "@/lib/use-local-sync-result";
 
 const DEFAULT_USERNAME = "Graphql";
 
-function formatTimestamp(timestamp: string) {
-  const date = new Date(Number(timestamp) * 1000);
-
-  if (Number.isNaN(date.getTime())) {
-    return "Unknown time";
-  }
-
-  return new Intl.DateTimeFormat("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
-}
-
-function statusTone(status: string) {
-  if (status === "Accepted") {
-    return "good";
-  }
-  if (status === "Wrong Answer" || status === "Runtime Error") {
-    return "bad";
-  }
-  return "warn";
-}
-
 export function SyncPreview() {
+  const storedSync = useLocalSyncResult();
   const [username, setUsername] = useState(DEFAULT_USERNAME);
   const [result, setResult] = useState<LeetCodeSyncResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const currentResult = result ?? storedSync?.data ?? null;
+  const usingStoredSync = !result && Boolean(storedSync);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -62,6 +50,7 @@ export function SyncPreview() {
       }
 
       setResult(payload.data);
+      saveLocalSyncResult(payload.data);
     } catch {
       setResult(null);
       setError("Unable to reach the sync endpoint.");
@@ -70,11 +59,18 @@ export function SyncPreview() {
     }
   }
 
+  function handleClearLocalSyncData() {
+    clearLocalSyncResult();
+    setResult(null);
+    setError(null);
+    setUsername(DEFAULT_USERNAME);
+  }
+
   return (
     <div className="space-y-6">
       <Card
         title="Public username sync"
-        subtitle="This fetches live public profile data from LeetCode GraphQL without login, cookies, or local persistence."
+        subtitle="This fetches live public profile data from LeetCode GraphQL without login or cookies, then stores the latest normalized result in localStorage."
       >
         <form className="space-y-4" onSubmit={handleSubmit}>
           <label className="block">
@@ -95,11 +91,27 @@ export function SyncPreview() {
             >
               {loading ? "Syncing..." : "Sync preview"}
             </button>
+            <button
+              type="button"
+              onClick={handleClearLocalSyncData}
+              className="inline-flex rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
+              Clear local sync data
+            </button>
             <p className="text-sm text-slate-600">
               Try `Graphql` or any public LeetCode username.
             </p>
           </div>
         </form>
+
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <DataSourceBadge live={Boolean(storedSync) || Boolean(result)} />
+          <p className="text-sm text-slate-600">
+            {storedSync
+              ? `Saved locally on ${storedSync.syncedAt.slice(0, 16).replace("T", " ")}`
+              : "No local sync data saved yet."}
+          </p>
+        </div>
       </Card>
 
       {error ? (
@@ -108,51 +120,53 @@ export function SyncPreview() {
         </Card>
       ) : null}
 
-      {result ? (
+      {currentResult ? (
         <>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <StatCard
               label="Total solved"
-              value={result.totalSolved}
-              detail={`${result.easySolved} easy • ${result.mediumSolved} medium • ${result.hardSolved} hard`}
+              value={currentResult.totalSolved}
+              detail={`${currentResult.easySolved} easy • ${currentResult.mediumSolved} medium • ${currentResult.hardSolved} hard`}
             />
             <StatCard
               label="Ranking"
-              value={result.ranking ?? "—"}
+              value={currentResult.ranking ?? "—"}
               detail="Live public ranking from LeetCode profile data."
             />
             <StatCard
               label="Recent submissions"
-              value={result.recentSubmissions.length}
+              value={currentResult.recentSubmissions.length}
               detail="Returned from the public recent submission list when available."
             />
             <StatCard
               label="Profile name"
-              value={result.realName || result.username}
-              detail={`Username: ${result.username}`}
+              value={currentResult.realName || currentResult.username}
+              detail={`Username: ${currentResult.username}`}
             />
           </div>
 
           <Card title="Result summary" subtitle="This is the live payload normalized for the app.">
             <div className="flex flex-col gap-5 md:flex-row md:items-center">
-              {result.userAvatar ? (
+              {currentResult.userAvatar ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={result.userAvatar}
-                  alt={`${result.username} avatar`}
+                  src={currentResult.userAvatar}
+                  alt={`${currentResult.username} avatar`}
                   className="h-16 w-16 rounded-2xl border border-slate-200 object-cover"
                 />
               ) : null}
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-xl font-semibold tracking-tight text-slate-950">
-                    {result.realName || result.username}
+                    {currentResult.realName || currentResult.username}
                   </h3>
-                  <Badge tone="good">@{result.username}</Badge>
+                  <Badge tone="good">@{currentResult.username}</Badge>
+                  <DataSourceBadge live={Boolean(currentResult)} compact />
                 </div>
                 <p className="text-sm leading-7 text-slate-600">
-                  The sync preview is live but read-only. It does not update mock pages or save
-                  anything to a database yet.
+                  {usingStoredSync
+                    ? "This result was restored from localStorage after hydration and can be reused by other pages without a backend."
+                    : "The latest successful sync is stored in localStorage and can now be reused by other pages without adding a backend."}
                 </p>
               </div>
             </div>
@@ -162,31 +176,7 @@ export function SyncPreview() {
             title="Recent submissions preview"
             subtitle="The public feed can contain accepted and non-accepted attempts."
           >
-            <div className="space-y-3">
-              {result.recentSubmissions.length ? (
-                result.recentSubmissions.slice(0, 12).map((submission) => (
-                  <div
-                    key={`${submission.titleSlug}-${submission.timestamp}-${submission.lang}`}
-                    className="grid gap-3 rounded-[1.5rem] border border-slate-200 p-4 md:grid-cols-[minmax(0,1.4fr)_auto_auto] md:items-center"
-                  >
-                    <div>
-                      <p className="text-base font-semibold text-slate-950">{submission.title}</p>
-                      <p className="mt-1 text-sm text-slate-600">
-                        {submission.titleSlug} • {formatTimestamp(submission.timestamp)}
-                      </p>
-                    </div>
-                    <Badge tone={statusTone(submission.statusDisplay)}>
-                      {submission.statusDisplay}
-                    </Badge>
-                    <p className="text-sm text-slate-600">{submission.lang}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm leading-7 text-slate-600">
-                  No recent public submissions were returned for this user.
-                </p>
-              )}
-            </div>
+            <LiveSubmissionList submissions={currentResult.recentSubmissions} limit={12} />
           </Card>
         </>
       ) : null}
