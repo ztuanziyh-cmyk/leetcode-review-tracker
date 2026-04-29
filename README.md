@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LeetCode Review Tracker
 
-## Getting Started
+LeetCode Review Tracker is a Next.js app for turning public LeetCode activity into a lightweight review workflow. It syncs a public username, derives a problem list from recent submissions, enriches those problems with metadata, and lets you manage review notes and spaced-repetition style follow-ups locally in the browser.
 
-First, run the development server:
+## Current Features
+
+- Public LeetCode username sync
+- `localStorage` persistence
+- Derived problem list from recent submissions
+- Enriched problem metadata with difficulty and topics
+- Local review notes
+- Review state
+- Review result logging
+- Automatic next review scheduling
+- Review history
+
+## Tech Stack
+
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- `localStorage`
+- LeetCode public GraphQL
+
+## Local Setup
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Usage Flow
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Go to `/sync`
+2. Enter a LeetCode username
+3. Sync public data
+4. Review problems in `/problems`
+5. Add notes in a problem detail page
+6. Use `/review` for daily review
 
-## Learn More
+## Data and Privacy
 
-To learn more about Next.js, take a look at the following resources:
+- No LeetCode password
+- No cookies
+- No Supabase yet
+- Data is stored locally in the browser
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Current Limitations
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Only recent public submissions are synced
+- Data is local to one browser
+- No account login yet
 
-## Deploy on Vercel
+## Roadmap
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Filters and search
+- Real stats from notes and topics
+- Export/import backup
+- Supabase persistence
+- Deployment
