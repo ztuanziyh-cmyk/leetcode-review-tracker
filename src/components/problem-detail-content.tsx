@@ -58,7 +58,7 @@ export function ProblemDetailContent({
     return (
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(20rem,0.9fr)]">
         <div className="space-y-6">
-          <Card title="Problem metadata" subtitle="Imported from the mock LeetCode dataset.">
+          <Card title="Problem metadata" subtitle="Loaded from the current fallback problem dataset.">
             <dl className="grid gap-4 text-sm text-slate-700 sm:grid-cols-2">
               <div>
                 <dt className="font-medium text-slate-500">Topics</dt>
@@ -101,7 +101,7 @@ export function ProblemDetailContent({
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-slate-600">No submissions yet in the mock dataset.</p>
+                <p className="text-sm text-slate-600">No submissions are available for this problem yet.</p>
               )}
             </div>
           </Card>
@@ -170,15 +170,14 @@ export function ProblemDetailContent({
               </div>
             ) : (
               <p className="text-sm leading-7 text-slate-600">
-                No review note exists yet. Phase 1 exposes the shape of the note model without
-                adding editing interactions.
+                No review notes saved yet. Add notes below to start tracking this problem.
               </p>
             )}
           </Card>
 
           <Card
             title="Edit review notes"
-            subtitle="These notes are saved locally by problem slug and override mock notes when present."
+            subtitle="Saved locally by problem slug and reused across the app."
           >
             <ReviewNotesForm
               key={slug}
@@ -356,7 +355,7 @@ export function ProblemDetailContent({
   return (
     <Card
       title="Problem not found"
-      subtitle="No matching mock problem or locally synced submission was found for this slug."
+      subtitle="No matching problem was found in local synced data or the fallback dataset."
     >
       <p className="text-sm leading-7 text-slate-600">
         If this problem came from a live sync, open `/sync` and run a sync again to refresh the

@@ -160,7 +160,7 @@ export function ProblemsOverview() {
     <div className="space-y-6">
       <Card
         title="Search, filters, and sorting"
-        subtitle="The list prefers synced local submissions when available and falls back to mock review data otherwise."
+        subtitle="The list prefers synced local submissions when available and falls back to the built-in sample set otherwise."
       >
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-3">
@@ -298,7 +298,7 @@ export function ProblemsOverview() {
       ) : (
         <Card title="No matching problems" subtitle="Try broadening the filters or resetting them.">
           <p className="text-sm leading-7 text-slate-600">
-            No problems match the current search, filter, and sort combination.
+            No problems match the current search, filter, and sort settings.
           </p>
         </Card>
       )}

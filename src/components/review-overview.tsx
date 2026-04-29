@@ -132,7 +132,7 @@ export function ReviewOverview() {
         <div className="flex flex-wrap gap-2 text-sm text-slate-700">
           <span className="rounded-full bg-slate-100 px-3 py-2">Due date today or earlier</span>
           <span className="rounded-full bg-slate-100 px-3 py-2">Confidence 1-2 stays visible</span>
-          <span className="rounded-full bg-slate-100 px-3 py-2">Mock queue remains as fallback</span>
+          <span className="rounded-full bg-slate-100 px-3 py-2">Fallback queue remains available</span>
         </div>
       </Card>
 
@@ -143,6 +143,14 @@ export function ReviewOverview() {
       </div>
 
       <div className="space-y-4">
+        {!usingLocalReviewNotes && fallbackVisibleItems.length === 0 ? (
+          <Card title="No due reviews" subtitle="Nothing is currently due in this browser.">
+            <p className="text-sm leading-7 text-slate-600">
+              Add review notes, sync more recent submissions, or log another review result to build
+              your next queue.
+            </p>
+          </Card>
+        ) : null}
         {usingLocalReviewNotes
           ? localDueItems.map((item) => (
               <Card key={item.id}>

@@ -6,7 +6,7 @@ export default function ReviewPage() {
     <PageShell
       eyebrow="Daily Queue"
       title="Today&apos;s review list"
-      description="The review queue now includes locally saved problem notes with due dates, while preserving the seeded fallback queue when no local notes are due."
+      description="See what is due today and log review results as you work through your queue."
     >
       <ReviewOverview />
     </PageShell>

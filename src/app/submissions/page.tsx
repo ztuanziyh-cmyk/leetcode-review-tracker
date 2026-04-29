@@ -6,7 +6,7 @@ export default function SubmissionsPage() {
     <PageShell
       eyebrow="Activity Feed"
       title="Recent submissions"
-      description="A reverse chronological view of recent LeetCode attempts. The page is intentionally simple in Phase 1, but the data model is already shaped for filtering and trend analysis."
+      description="A reverse chronological view of recent LeetCode attempts and accepted runs."
     >
       <SubmissionsOverview />
     </PageShell>

@@ -57,7 +57,7 @@ export function DashboardOverview() {
           detail={
             usingLiveData
               ? "Live public profile ranking from the latest local sync."
-              : "Mock fallback profile ranking."
+              : "Profile ranking from the current local data source."
           }
         />
       </div>
@@ -96,8 +96,8 @@ export function DashboardOverview() {
               <Badge>LocalStorage persisted</Badge>
             </div>
             <p className="leading-7">
-              Review data and weak-topic analysis are still mock-driven, but profile totals and the
-              dashboard submission preview now switch to locally synced LeetCode data when present.
+              Profile totals and recent activity come from the latest local sync when available,
+              while the rest of the workspace stays usable with fallback sample data.
             </p>
           </div>
         </Card>
@@ -109,7 +109,7 @@ export function DashboardOverview() {
           subtitle={
             usingLiveData
               ? "Live local submission preview from the most recent username sync."
-              : "Mock submission feed used when no local sync exists."
+              : "Fallback submission feed shown until a live sync is available."
           }
         >
           <div className="mb-4">
@@ -121,7 +121,6 @@ export function DashboardOverview() {
             <div className="space-y-3">
               {fallbackData.recentSubmissions.map((submission) => (
                 <div key={submission.id}>
-                  {/* Imported existing mock row path remains unchanged. */}
                   <div className="grid gap-3 rounded-[1.5rem] border border-slate-200 p-4 md:grid-cols-[minmax(0,1.2fr)_auto_auto_auto] md:items-center">
                     <div>
                       <Link

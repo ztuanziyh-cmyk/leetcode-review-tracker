@@ -6,7 +6,7 @@ export default function SyncPage() {
     <PageShell
       eyebrow="Live Preview"
       title="LeetCode public sync"
-      description="Fetch a real public LeetCode profile by username and preview the normalized data that a future persistence layer can save."
+      description="Sync a public LeetCode profile by username and bring recent activity into your local review workspace."
     >
       <SyncPreview />
     </PageShell>

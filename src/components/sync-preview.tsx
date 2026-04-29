@@ -70,7 +70,7 @@ export function SyncPreview() {
     <div className="space-y-6">
       <Card
         title="Public username sync"
-        subtitle="This fetches live public profile data from LeetCode GraphQL without login or cookies, then stores the latest normalized result in localStorage."
+        subtitle="Fetch a public LeetCode profile without login or cookies, then store the latest result locally in this browser."
       >
         <form className="space-y-4" onSubmit={handleSubmit}>
           <label className="block">
@@ -109,7 +109,7 @@ export function SyncPreview() {
           <p className="text-sm text-slate-600">
             {storedSync
               ? `Saved locally on ${storedSync.syncedAt.slice(0, 16).replace("T", " ")}`
-              : "No local sync data saved yet."}
+              : "No synced data saved locally yet."}
           </p>
           <p className="text-sm text-slate-600">
             Recently synced problems are enriched with question metadata when available.
@@ -168,8 +168,8 @@ export function SyncPreview() {
                 </div>
                 <p className="text-sm leading-7 text-slate-600">
                   {usingStoredSync
-                    ? "This result was restored from localStorage after hydration and can be reused by other pages without a backend."
-                    : "The latest successful sync is stored in localStorage and can now be reused by other pages without adding a backend."}
+                    ? "This sync result was restored from local data and is available across the app."
+                    : "The latest successful sync is saved locally and is now available across the app."}
                 </p>
               </div>
             </div>

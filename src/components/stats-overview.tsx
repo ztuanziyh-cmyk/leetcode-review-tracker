@@ -36,12 +36,12 @@ export function StatsOverview() {
               fallbackStats.solvedByDifficulty.Medium +
               fallbackStats.solvedByDifficulty.Hard
             }
-            detail="Current mock dataset size for tracked LeetCode problems."
+            detail="Current fallback dataset size for tracked LeetCode problems."
           />
           <StatCard
             label="Accepted submissions"
             value={fallbackStats.acceptedCount}
-            detail="Accepted runs included in the mock submission seed data."
+            detail="Accepted runs included in the fallback submission dataset."
           />
           <StatCard
             label="Low confidence notes"
@@ -51,12 +51,12 @@ export function StatsOverview() {
           <StatCard
             label="Non-accepted submissions"
             value={fallbackStats.nonAcceptedCount}
-            detail="Wrong answer, runtime, or time-limit outcomes in the mock feed."
+            detail="Wrong answer, runtime, or time-limit outcomes in the fallback submission feed."
           />
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-          <Card title="Weak topics" subtitle="Calculated from the mock dataset.">
+          <Card title="Weak topics" subtitle="Calculated from the fallback dataset.">
             <div className="space-y-4">
               {fallbackStats.weakTopics.map((topic) => (
                 <TopicMeter key={topic.topic} {...topic} />

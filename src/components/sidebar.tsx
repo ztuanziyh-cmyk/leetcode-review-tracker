@@ -21,13 +21,13 @@ export function Sidebar() {
       <div className="flex items-center justify-between gap-4 md:block">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-700">
-            LeetCode Review Tracker
+            LEETCODE REVIEW TRACKER
           </p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
-            Mock UI
+            Review Tracker
           </h1>
           <p className="mt-2 max-w-56 text-sm leading-6 text-slate-600">
-            Public progress, review notes, and a daily queue in one place.
+            Track solved problems, review notes, and daily practice in one place.
           </p>
         </div>
       </div>
@@ -58,8 +58,8 @@ export function Sidebar() {
           CURRENT STATUS
         </p>
         <p className="mt-2 text-sm leading-6 text-slate-700">
-          Live LeetCode public sync enabled. Data and review notes are stored locally in this
-          browser. No auth or Supabase yet.
+          Live LeetCode public sync is enabled. Data and review notes are stored locally in this
+          browser. No account login or cloud sync yet.
         </p>
       </div>
     </aside>
