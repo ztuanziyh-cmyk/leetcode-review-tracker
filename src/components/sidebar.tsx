@@ -10,6 +10,7 @@ const navigation = [
   { href: "/submissions", label: "Submissions" },
   { href: "/review", label: "Daily Review" },
   { href: "/stats", label: "Statistics" },
+  { href: "/settings", label: "Settings" },
 ] as const;
 
 export function Sidebar() {
