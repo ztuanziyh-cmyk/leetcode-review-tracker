@@ -32,6 +32,7 @@ export function SyncedProblemRow({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
+        <Badge>{reviewNote.reviewState}</Badge>
         <Badge tone={reviewNote.confidence ? "good" : "neutral"}>
           Confidence {reviewNote.confidence ?? "—"}
         </Badge>

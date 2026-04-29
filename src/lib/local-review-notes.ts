@@ -11,6 +11,13 @@ const EMPTY_REVIEW_NOTES: LocalReviewNotesMap = {};
 let cachedRawValue: string | null | undefined;
 let cachedParsedValue: LocalReviewNotesMap = {};
 
+function normalizeLocalReviewNote(note: LocalReviewNote) {
+  return {
+    ...note,
+    reviewState: note.reviewState ?? "Need Review",
+  } satisfies LocalReviewNote;
+}
+
 function parseLocalReviewNotes(
   rawValue: string | null,
 ): LocalReviewNotesMap {
@@ -25,7 +32,9 @@ function parseLocalReviewNotes(
       return {};
     }
 
-    return parsed;
+    return Object.fromEntries(
+      Object.entries(parsed).map(([slug, note]) => [slug, normalizeLocalReviewNote(note)]),
+    );
   } catch {
     return {};
   }
@@ -78,6 +87,7 @@ export function buildInitialLocalReviewNote(
 
   return {
     problemSlug: slug,
+    reviewState: "Need Review",
     confidence: mockReviewNote?.confidence ?? null,
     mistakeType: mockReviewNote?.mistakeType ?? "",
     pattern: mockReviewNote?.pattern ?? "",
@@ -96,6 +106,7 @@ export function getReviewNoteSummary(
 ): ReviewNoteSummary {
   if (localReviewNote) {
     return {
+      reviewState: localReviewNote.reviewState,
       confidence: localReviewNote.confidence,
       mistakeType: localReviewNote.mistakeType,
       pattern: localReviewNote.pattern,
@@ -109,6 +120,7 @@ export function getReviewNoteSummary(
   }
 
   return {
+    reviewState: "Need Review",
     confidence: mockReviewNote?.confidence ?? null,
     mistakeType: mockReviewNote?.mistakeType ?? "",
     pattern: mockReviewNote?.pattern ?? "",

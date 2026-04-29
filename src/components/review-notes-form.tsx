@@ -5,6 +5,8 @@ import { useState } from "react";
 import { saveLocalReviewNote } from "@/lib/local-review-notes";
 import type { LocalReviewNote } from "@/lib/types";
 
+const reviewStates = ["New", "Need Review", "Reviewing", "Mastered"] as const;
+
 const mistakeTypes = [
   "Pattern Recognition",
   "Edge Case",
@@ -75,6 +77,23 @@ export function ReviewNotesForm({ initialNote }: ReviewNotesFormProps) {
   return (
     <form className="space-y-5" onSubmit={handleSubmit}>
       <div className="grid gap-4 sm:grid-cols-2">
+        <label className="block">
+          <span className="text-sm font-medium text-slate-700">Review state</span>
+          <select
+            value={form.reviewState}
+            onChange={(event) =>
+              updateField("reviewState", event.target.value as LocalReviewNote["reviewState"])
+            }
+            className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
+          >
+            {reviewStates.map((reviewState) => (
+              <option key={reviewState} value={reviewState}>
+                {reviewState}
+              </option>
+            ))}
+          </select>
+        </label>
+
         <label className="block">
           <span className="text-sm font-medium text-slate-700">Confidence</span>
           <select

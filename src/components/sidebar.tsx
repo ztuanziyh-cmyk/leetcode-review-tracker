@@ -54,10 +54,11 @@ export function Sidebar() {
 
       <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-          Phase 1
+          CURRENT STATUS
         </p>
         <p className="mt-2 text-sm leading-6 text-slate-700">
-          Local mock data only. No auth, no Supabase, no live LeetCode sync.
+          Live LeetCode public sync enabled. Data and review notes are stored locally in this
+          browser. No auth or Supabase yet.
         </p>
       </div>
     </aside>

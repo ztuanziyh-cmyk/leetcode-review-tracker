@@ -51,6 +51,7 @@ export function ProblemRow({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
+        <Badge>{reviewNote.reviewState}</Badge>
         <Badge tone={confidenceTone(reviewNote.confidence)}>
           Confidence {reviewNote.confidence ?? "—"}
         </Badge>

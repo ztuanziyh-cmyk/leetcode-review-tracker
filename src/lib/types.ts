@@ -11,6 +11,8 @@ export type SubmissionStatus =
 
 export type Confidence = 1 | 2 | 3 | 4 | 5;
 
+export type ReviewState = "New" | "Need Review" | "Reviewing" | "Mastered";
+
 export type MistakeType =
   | "Edge Case"
   | "Pattern Recognition"
@@ -101,6 +103,7 @@ export type ReviewNote = {
 
 export type LocalReviewNote = {
   problemSlug: string;
+  reviewState: ReviewState;
   confidence: Confidence | null;
   mistakeType: MistakeType | "";
   pattern: Pattern | "";
@@ -113,6 +116,7 @@ export type LocalReviewNote = {
 };
 
 export type ReviewNoteSummary = {
+  reviewState: ReviewState;
   confidence: Confidence | null;
   mistakeType: string;
   pattern: string;

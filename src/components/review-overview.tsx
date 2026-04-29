@@ -14,6 +14,19 @@ const fallbackReviewItems = getDailyReviewItems();
 const fallbackProblems = getProblemsList();
 const today = "2026-04-29";
 
+function reviewStatePriority(reviewState: string) {
+  if (reviewState === "Need Review") {
+    return 0;
+  }
+  if (reviewState === "Reviewing") {
+    return 1;
+  }
+  if (reviewState === "New") {
+    return 2;
+  }
+  return 3;
+}
+
 export function ReviewOverview() {
   const storedSync = useLocalSyncResult();
   const localReviewNotes = useLocalReviewNotes();
@@ -50,7 +63,14 @@ export function ReviewOverview() {
   });
 
   const localDueItems = Object.values(localReviewNotes)
-    .filter((note) => note.nextReviewDate && note.nextReviewDate <= today)
+    .filter(
+      (note) =>
+        note.reviewState !== "Mastered" &&
+        ((note.nextReviewDate && note.nextReviewDate <= today) ||
+          note.reviewState === "Need Review" ||
+          note.reviewState === "Reviewing" ||
+          (note.confidence !== null && note.confidence <= 2)),
+    )
     .map((note) => {
       const problem = problemBySlug.get(note.problemSlug);
 
@@ -62,7 +82,25 @@ export function ReviewOverview() {
           }
         : null;
     })
-    .filter((item) => item !== null);
+    .filter((item) => item !== null)
+    .sort((left, right) => {
+      const stateDelta =
+        reviewStatePriority(left.reviewNote.reviewState) -
+        reviewStatePriority(right.reviewNote.reviewState);
+
+      if (stateDelta !== 0) {
+        return stateDelta;
+      }
+
+      const dueDelta = left.reviewNote.nextReviewDate.localeCompare(right.reviewNote.nextReviewDate);
+      if (dueDelta !== 0) {
+        return dueDelta;
+      }
+
+      const leftConfidence = left.reviewNote.confidence ?? 99;
+      const rightConfidence = right.reviewNote.confidence ?? 99;
+      return leftConfidence - rightConfidence;
+    });
 
   const usingLocalReviewNotes = localDueItems.length > 0;
   const completedCount = usingLocalReviewNotes
@@ -107,6 +145,7 @@ export function ReviewOverview() {
                         : "Topics unavailable"}
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
+                      <Badge>{item.reviewNote.reviewState}</Badge>
                       <Badge>Confidence {item.reviewNote.confidence ?? "—"}</Badge>
                       <Badge>{item.reviewNote.mistakeType || "No mistake type"}</Badge>
                       <Badge>{item.reviewNote.pattern || "No pattern"}</Badge>

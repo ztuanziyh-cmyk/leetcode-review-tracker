@@ -127,6 +127,7 @@ export function ProblemDetailContent({
                   <Badge tone="good">
                     {getConfidenceLabel(reviewSummary.confidence)}
                   </Badge>
+                  <Badge>{reviewSummary.reviewState}</Badge>
                   <Badge>{reviewSummary.mistakeType || "No mistake type"}</Badge>
                   <Badge>{reviewSummary.pattern || "No pattern"}</Badge>
                 </div>
