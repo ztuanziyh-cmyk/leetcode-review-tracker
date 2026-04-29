@@ -12,6 +12,7 @@ export type SubmissionStatus =
 export type Confidence = 1 | 2 | 3 | 4 | 5;
 
 export type ReviewState = "New" | "Need Review" | "Reviewing" | "Mastered";
+export type ReviewResult = "Forgot" | "Partial" | "Remembered" | "Mastered";
 
 export type MistakeType =
   | "Edge Case"
@@ -134,6 +135,17 @@ export type ReviewSession = {
   reviewedAt: string;
   confidenceAfterReview: Confidence;
   notes?: string;
+};
+
+export type LocalReviewHistoryRecord = {
+  id: string;
+  problemSlug: string;
+  reviewedAt: string;
+  result: ReviewResult;
+  confidenceBefore: Confidence | null;
+  confidenceAfter: Confidence;
+  nextReviewDate: string;
+  note?: string;
 };
 
 export type DailyReviewItem = {

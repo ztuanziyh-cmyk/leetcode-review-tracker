@@ -9,6 +9,7 @@ import { getReviewNoteSummary } from "@/lib/local-review-notes";
 import { getDailyReviewItems, getProblemsList } from "@/lib/review-logic";
 import { useLocalReviewNotes } from "@/lib/use-local-review-notes";
 import { useLocalSyncResult } from "@/lib/use-local-sync-result";
+import { ReviewResultActions } from "@/components/review-result-actions";
 
 const fallbackReviewItems = getDailyReviewItems();
 const fallbackProblems = getProblemsList();
@@ -103,9 +104,27 @@ export function ReviewOverview() {
     });
 
   const usingLocalReviewNotes = localDueItems.length > 0;
+  const fallbackVisibleItems = fallbackReviewItems.filter((item) => {
+    const localNote = localReviewNotes[item.problem.slug];
+
+    if (!localNote) {
+      return true;
+    }
+
+    if (localNote.reviewState === "Mastered") {
+      return false;
+    }
+
+    return (
+      localNote.reviewState === "Need Review" ||
+      localNote.reviewState === "Reviewing" ||
+      (localNote.nextReviewDate && localNote.nextReviewDate <= today) ||
+      (localNote.confidence !== null && localNote.confidence <= 2)
+    );
+  });
   const completedCount = usingLocalReviewNotes
     ? 0
-    : fallbackReviewItems.filter((item) => item.completed).length;
+    : fallbackVisibleItems.filter((item) => item.completed).length;
 
   return (
     <>
@@ -161,9 +180,12 @@ export function ReviewOverview() {
                     </p>
                   </div>
                 </div>
+                <div className="mt-4">
+                  <ReviewResultActions problemSlug={item.problem.slug} compact />
+                </div>
               </Card>
             ))
-          : fallbackReviewItems.map((item) => (
+          : fallbackVisibleItems.map((item) => (
               <Card key={item.id}>
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
@@ -194,6 +216,9 @@ export function ReviewOverview() {
                     <p className="mt-1">Next review {item.reviewNote?.nextReviewAt?.slice(0, 10)}</p>
                     <p className="mt-1">Confidence {item.reviewNote?.confidence ?? "—"} / 5</p>
                   </div>
+                </div>
+                <div className="mt-4">
+                  <ReviewResultActions problemSlug={item.problem.slug} compact />
                 </div>
               </Card>
             ))}

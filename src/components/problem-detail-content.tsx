@@ -9,10 +9,12 @@ import {
   getReviewNoteSummary,
 } from "@/lib/local-review-notes";
 import { getSyncedTrackedProblemDetail } from "@/lib/local-synced-problems";
+import { useLocalReviewHistory } from "@/lib/use-local-review-history";
 import { useLocalReviewNotes } from "@/lib/use-local-review-notes";
 import { useLocalSyncResult } from "@/lib/use-local-sync-result";
 import type { getProblemDetail } from "@/lib/review-logic";
 import { ReviewNotesForm } from "@/components/review-notes-form";
+import { ReviewResultActions } from "@/components/review-result-actions";
 
 type MockProblemDetail = ReturnType<typeof getProblemDetail>;
 
@@ -44,8 +46,10 @@ export function ProblemDetailContent({
 }: ProblemDetailContentProps) {
   const storedSync = useLocalSyncResult();
   const localReviewNotes = useLocalReviewNotes();
+  const localReviewHistory = useLocalReviewHistory();
   const syncedDetail = getSyncedTrackedProblemDetail(storedSync?.data, slug);
   const localReviewNote = localReviewNotes[slug];
+  const reviewHistory = localReviewHistory[slug] ?? [];
 
   if (mockDetail) {
     const { problem, reviewNote, submissions, relatedProblems } = mockDetail;
@@ -181,6 +185,40 @@ export function ProblemDetailContent({
               initialNote={buildInitialLocalReviewNote(slug, localReviewNote ?? reviewNote)}
             />
           </Card>
+
+          <Card
+            title="Log review result"
+            subtitle="Use a review result to update confidence, next review date, and review state automatically."
+          >
+            <ReviewResultActions problemSlug={slug} />
+          </Card>
+
+          <Card title="Review history" subtitle="Newest first. Stored locally in this browser.">
+            {reviewHistory.length ? (
+              <div className="space-y-3">
+                {reviewHistory.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="rounded-[1.5rem] border border-slate-200 p-4 text-sm text-slate-700"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge>{entry.result}</Badge>
+                      <Badge>Before {entry.confidenceBefore ?? "—"}</Badge>
+                      <Badge>After {entry.confidenceAfter}</Badge>
+                    </div>
+                    <p className="mt-2 text-slate-600">
+                      {entry.reviewedAt.slice(0, 16)} • Next review {entry.nextReviewDate}
+                    </p>
+                    {entry.note ? <p className="mt-2 leading-7">{entry.note}</p> : null}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm leading-7 text-slate-600">
+                No review history yet. Log a result to start building spaced-repetition history.
+              </p>
+            )}
+          </Card>
         </div>
       </div>
     );
@@ -275,6 +313,40 @@ export function ProblemDetailContent({
               key={slug}
               initialNote={buildInitialLocalReviewNote(slug, localReviewNote)}
             />
+          </Card>
+
+          <Card
+            title="Log review result"
+            subtitle="Use a review result to update confidence, next review date, and review state automatically."
+          >
+            <ReviewResultActions problemSlug={slug} />
+          </Card>
+
+          <Card title="Review history" subtitle="Newest first. Stored locally in this browser.">
+            {reviewHistory.length ? (
+              <div className="space-y-3">
+                {reviewHistory.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="rounded-[1.5rem] border border-slate-200 p-4 text-sm text-slate-700"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge>{entry.result}</Badge>
+                      <Badge>Before {entry.confidenceBefore ?? "—"}</Badge>
+                      <Badge>After {entry.confidenceAfter}</Badge>
+                    </div>
+                    <p className="mt-2 text-slate-600">
+                      {entry.reviewedAt.slice(0, 16)} • Next review {entry.nextReviewDate}
+                    </p>
+                    {entry.note ? <p className="mt-2 leading-7">{entry.note}</p> : null}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm leading-7 text-slate-600">
+                No review history yet. Log a result to start building spaced-repetition history.
+              </p>
+            )}
           </Card>
         </div>
       </div>
