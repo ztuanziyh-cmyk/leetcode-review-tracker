@@ -24,6 +24,8 @@ function parseStoredSyncResult(rawValue: string | null): StoredLeetCodeSyncResul
       return null;
     }
 
+    parsed.data.problemMetadataBySlug ??= {};
+
     return parsed;
   } catch {
     return null;

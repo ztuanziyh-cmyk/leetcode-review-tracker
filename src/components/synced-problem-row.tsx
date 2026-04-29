@@ -4,6 +4,19 @@ import { Badge } from "@/components/badge";
 import { getReviewNoteSummary } from "@/lib/local-review-notes";
 import type { LocalReviewNote, SyncedTrackedProblem } from "@/lib/types";
 
+function difficultyTone(difficulty: SyncedTrackedProblem["difficulty"]) {
+  if (difficulty === "Easy") {
+    return "easy";
+  }
+  if (difficulty === "Medium") {
+    return "medium";
+  }
+  if (difficulty === "Hard") {
+    return "hard";
+  }
+  return "neutral";
+}
+
 export function SyncedProblemRow({
   problem,
   localReviewNote,
@@ -20,14 +33,17 @@ export function SyncedProblemRow({
     >
       <div>
         <div className="flex flex-wrap items-center gap-2">
+          {problem.questionFrontendId ? <Badge>#{problem.questionFrontendId}</Badge> : null}
           <h3 className="text-base font-semibold text-slate-950">{problem.title}</h3>
-          <Badge>{problem.difficulty}</Badge>
+          <Badge tone={difficultyTone(problem.difficulty)}>{problem.difficulty}</Badge>
           <Badge tone={problem.status === "accepted" ? "good" : "warn"}>
             {problem.status}
           </Badge>
         </div>
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          Topics unavailable from recent submissions.
+          {problem.topics.length
+            ? problem.topics.join(" • ")
+            : "Topics unavailable from recent submissions."}
         </p>
       </div>
 

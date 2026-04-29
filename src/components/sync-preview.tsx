@@ -111,6 +111,9 @@ export function SyncPreview() {
               ? `Saved locally on ${storedSync.syncedAt.slice(0, 16).replace("T", " ")}`
               : "No local sync data saved yet."}
           </p>
+          <p className="text-sm text-slate-600">
+            Recently synced problems are enriched with question metadata when available.
+          </p>
         </div>
       </Card>
 
@@ -139,9 +142,9 @@ export function SyncPreview() {
               detail="Returned from the public recent submission list when available."
             />
             <StatCard
-              label="Profile name"
-              value={currentResult.realName || currentResult.username}
-              detail={`Username: ${currentResult.username}`}
+              label="Metadata enriched"
+              value={Object.keys(currentResult.problemMetadataBySlug ?? {}).length}
+              detail="Recently synced problems enriched with question metadata."
             />
           </div>
 

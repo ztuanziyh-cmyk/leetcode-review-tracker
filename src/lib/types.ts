@@ -155,10 +155,13 @@ export type SyncedTrackedProblem = {
   id: string;
   title: string;
   slug: string;
-  difficulty: "Unknown";
+  questionFrontendId?: string;
+  difficulty: Difficulty | "Unknown";
   topics: string[];
+  topicTagSlugs?: string[];
   latestStatus: string;
   latestSubmittedAt: string;
   status: "accepted" | "attempted";
   source: "local-sync";
+  url?: string;
 };

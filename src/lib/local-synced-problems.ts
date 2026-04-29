@@ -42,17 +42,21 @@ export function deriveTrackedProblemsFromSync(
       const accepted = sortedSubmissions.some(
         (submission) => submission.statusDisplay === "Accepted",
       );
+      const metadata = syncResult.problemMetadataBySlug?.[slug];
 
       return {
         id: `local-sync-${slug}`,
-        title: latestSubmission.title,
+        title: metadata?.title ?? latestSubmission.title,
         slug,
-        difficulty: "Unknown",
-        topics: [],
+        questionFrontendId: metadata?.questionFrontendId,
+        difficulty: metadata?.difficulty ?? "Unknown",
+        topics: metadata?.topicTags.map((topic) => topic.name) ?? [],
+        topicTagSlugs: metadata?.topicTags.map((topic) => topic.slug) ?? [],
         latestStatus: latestSubmission.statusDisplay,
         latestSubmittedAt: toIsoTimestamp(latestSubmission.timestamp),
         status: accepted ? "accepted" : "attempted",
         source: "local-sync",
+        url: metadata?.url,
       } satisfies SyncedTrackedProblem;
     })
     .sort((left, right) => right.latestSubmittedAt.localeCompare(left.latestSubmittedAt));
@@ -77,18 +81,22 @@ export function getSyncedTrackedProblemDetail(
   const accepted = matchingSubmissions.some(
     (submission) => submission.statusDisplay === "Accepted",
   );
+  const metadata = syncResult.problemMetadataBySlug?.[slug];
 
   return {
     problem: {
       id: `local-sync-${slug}`,
-      title: matchingSubmissions[0].title,
+      title: metadata?.title ?? matchingSubmissions[0].title,
       slug,
-      difficulty: "Unknown",
-      topics: [],
+      questionFrontendId: metadata?.questionFrontendId,
+      difficulty: metadata?.difficulty ?? "Unknown",
+      topics: metadata?.topicTags.map((topic) => topic.name) ?? [],
+      topicTagSlugs: metadata?.topicTags.map((topic) => topic.slug) ?? [],
       latestStatus: matchingSubmissions[0].statusDisplay,
       latestSubmittedAt: toIsoTimestamp(matchingSubmissions[0].timestamp),
       status: accepted ? "accepted" : "attempted",
       source: "local-sync",
+      url: metadata?.url,
     },
     submissions: matchingSubmissions,
   };

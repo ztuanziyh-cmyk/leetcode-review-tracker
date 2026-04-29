@@ -199,11 +199,15 @@ export function ProblemDetailContent({
               <dl className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <dt className="font-medium text-slate-500">Difficulty</dt>
-                  <dd className="mt-1">Unknown</dd>
+                  <dd className="mt-1">{syncedDetail.problem.difficulty}</dd>
                 </div>
                 <div>
                   <dt className="font-medium text-slate-500">Tracked status</dt>
                   <dd className="mt-1">{syncedDetail.problem.status}</dd>
+                </div>
+                <div>
+                  <dt className="font-medium text-slate-500">Question number</dt>
+                  <dd className="mt-1">{syncedDetail.problem.questionFrontendId ?? "Unknown"}</dd>
                 </div>
                 <div>
                   <dt className="font-medium text-slate-500">Latest status</dt>
@@ -215,7 +219,28 @@ export function ProblemDetailContent({
                 </div>
                 <div className="sm:col-span-2">
                   <dt className="font-medium text-slate-500">Topics</dt>
-                  <dd className="mt-1">Unavailable from recent submissions.</dd>
+                  <dd className="mt-1">
+                    {syncedDetail.problem.topics.length
+                      ? syncedDetail.problem.topics.join(" • ")
+                      : "Unavailable from recent submissions."}
+                  </dd>
+                </div>
+                <div className="sm:col-span-2">
+                  <dt className="font-medium text-slate-500">LeetCode URL</dt>
+                  <dd className="mt-1">
+                    {syncedDetail.problem.url ? (
+                      <a
+                        href={syncedDetail.problem.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sky-700 hover:text-sky-800"
+                      >
+                        {syncedDetail.problem.url}
+                      </a>
+                    ) : (
+                      "Unavailable"
+                    )}
+                  </dd>
                 </div>
               </dl>
             </div>
