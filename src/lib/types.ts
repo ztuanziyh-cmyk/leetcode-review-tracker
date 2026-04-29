@@ -12,31 +12,40 @@ export type SubmissionStatus =
 export type Confidence = 1 | 2 | 3 | 4 | 5;
 
 export type MistakeType =
-  | "None"
-  | "Logic"
   | "Edge Case"
-  | "Syntax"
+  | "Pattern Recognition"
+  | "Implementation Bug"
   | "Time Complexity"
   | "Space Complexity"
   | "Data Structure Choice"
-  | "Pattern Recognition"
+  | "Problem Understanding"
   | "Careless Mistake"
+  | "Forgot Template"
   | "Other";
 
 export type Pattern =
+  | "Hash Table"
+  | "Array"
+  | "String"
+  | "Linked List"
+  | "Stack"
+  | "Queue"
   | "Two Pointers"
   | "Sliding Window"
   | "Binary Search"
+  | "Prefix Sum"
   | "DFS"
   | "BFS"
-  | "Dynamic Programming"
-  | "Greedy"
-  | "Backtracking"
-  | "Heap"
-  | "Graph"
   | "Tree"
-  | "Prefix Sum"
+  | "Graph"
+  | "Heap"
+  | "Greedy"
+  | "Dynamic Programming"
+  | "Backtracking"
   | "Union Find"
+  | "Bit Manipulation"
+  | "Math"
+  | "Sorting"
   | "Other";
 
 export type UserProfile = {
