@@ -6,12 +6,14 @@ import { ProblemRow } from "@/components/problem-row";
 import { SyncedProblemRow } from "@/components/synced-problem-row";
 import { deriveTrackedProblemsFromSync } from "@/lib/local-synced-problems";
 import { getProblemsList } from "@/lib/review-logic";
+import { useLocalReviewNotes } from "@/lib/use-local-review-notes";
 import { useLocalSyncResult } from "@/lib/use-local-sync-result";
 
 const fallbackProblems = getProblemsList();
 
 export function ProblemsOverview() {
   const storedSync = useLocalSyncResult();
+  const localReviewNotes = useLocalReviewNotes();
   const syncedProblems = deriveTrackedProblemsFromSync(storedSync?.data);
   const usingLiveData = syncedProblems.length > 0;
   const lowConfidenceCount = fallbackProblems.filter(
@@ -44,10 +46,18 @@ export function ProblemsOverview() {
       <div className="space-y-4">
         {usingLiveData
           ? syncedProblems.map((problem) => (
-              <SyncedProblemRow key={problem.slug} problem={problem} />
+              <SyncedProblemRow
+                key={problem.slug}
+                problem={problem}
+                localReviewNote={localReviewNotes[problem.slug]}
+              />
             ))
           : fallbackProblems.map((problem) => (
-              <ProblemRow key={problem.slug} problem={problem} />
+              <ProblemRow
+                key={problem.slug}
+                problem={problem}
+                localReviewNote={localReviewNotes[problem.slug]}
+              />
             ))}
       </div>
     </div>

@@ -4,9 +4,15 @@ import { Badge } from "@/components/badge";
 import { Card } from "@/components/card";
 import { DataSourceBadge } from "@/components/data-source-badge";
 import { ProblemRow } from "@/components/problem-row";
+import {
+  buildInitialLocalReviewNote,
+  getReviewNoteSummary,
+} from "@/lib/local-review-notes";
 import { getSyncedTrackedProblemDetail } from "@/lib/local-synced-problems";
+import { useLocalReviewNotes } from "@/lib/use-local-review-notes";
 import { useLocalSyncResult } from "@/lib/use-local-sync-result";
 import type { getProblemDetail } from "@/lib/review-logic";
+import { ReviewNotesForm } from "@/components/review-notes-form";
 
 type MockProblemDetail = ReturnType<typeof getProblemDetail>;
 
@@ -14,6 +20,19 @@ type ProblemDetailContentProps = {
   slug: string;
   mockDetail: MockProblemDetail;
 };
+
+function getConfidenceLabel(confidence?: number | null) {
+  if (!confidence) {
+    return "Unreviewed";
+  }
+  if (confidence <= 2) {
+    return "Fragile";
+  }
+  if (confidence === 3) {
+    return "Shaky";
+  }
+  return "Solid";
+}
 
 function formatSyncTimestamp(timestamp: string) {
   return new Date(Number(timestamp) * 1000).toISOString().slice(0, 16);
@@ -24,10 +43,13 @@ export function ProblemDetailContent({
   mockDetail,
 }: ProblemDetailContentProps) {
   const storedSync = useLocalSyncResult();
+  const localReviewNotes = useLocalReviewNotes();
   const syncedDetail = getSyncedTrackedProblemDetail(storedSync?.data, slug);
+  const localReviewNote = localReviewNotes[slug];
 
   if (mockDetail) {
-    const { problem, reviewNote, submissions, relatedProblems, confidenceLabel } = mockDetail;
+    const { problem, reviewNote, submissions, relatedProblems } = mockDetail;
+    const reviewSummary = getReviewNoteSummary(localReviewNote, reviewNote);
 
     return (
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(20rem,0.9fr)]">
@@ -83,7 +105,11 @@ export function ProblemDetailContent({
           <Card title="Related review candidates" subtitle="Nearby problems that share overlapping topics.">
             <div className="space-y-3">
               {relatedProblems.map((relatedProblem) => (
-                <ProblemRow key={relatedProblem.slug} problem={relatedProblem} />
+                <ProblemRow
+                  key={relatedProblem.slug}
+                  problem={relatedProblem}
+                  localReviewNote={localReviewNotes[relatedProblem.slug]}
+                />
               ))}
             </div>
           </Card>
@@ -91,39 +117,51 @@ export function ProblemDetailContent({
 
         <div className="space-y-6">
           <Card title="Review note" subtitle="Manual metadata that drives the review workflow.">
-            {reviewNote ? (
+            {reviewSummary.confidence ||
+            reviewSummary.mistakeType ||
+            reviewSummary.pattern ||
+            reviewSummary.keyTakeaway ||
+            reviewSummary.freeformNotes ? (
               <div className="space-y-5 text-sm text-slate-700">
                 <div className="flex flex-wrap gap-2">
-                  <Badge tone="good">{confidenceLabel}</Badge>
-                  <Badge>{reviewNote.mistakeType}</Badge>
-                  <Badge>{reviewNote.pattern}</Badge>
+                  <Badge tone="good">
+                    {getConfidenceLabel(reviewSummary.confidence)}
+                  </Badge>
+                  <Badge>{reviewSummary.mistakeType || "No mistake type"}</Badge>
+                  <Badge>{reviewSummary.pattern || "No pattern"}</Badge>
                 </div>
                 <div>
-                  <p className="font-medium text-slate-500">Summary</p>
-                  <p className="mt-2 leading-7">{reviewNote.summary}</p>
+                  <p className="font-medium text-slate-500">Core idea</p>
+                  <p className="mt-2 leading-7">{reviewSummary.coreIdea || "Not recorded yet."}</p>
+                </div>
+                <div>
+                  <p className="font-medium text-slate-500">Why missed</p>
+                  <p className="mt-2 leading-7">
+                    {reviewSummary.whyMissed || "Not recorded yet."}
+                  </p>
                 </div>
                 <div>
                   <p className="font-medium text-slate-500">Key takeaway</p>
-                  <p className="mt-2 leading-7">{reviewNote.keyTakeaway}</p>
+                  <p className="mt-2 leading-7">
+                    {reviewSummary.keyTakeaway || "Not recorded yet."}
+                  </p>
                 </div>
                 <dl className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <dt className="font-medium text-slate-500">Confidence</dt>
-                    <dd className="mt-1">{reviewNote.confidence} / 5</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-slate-500">Review count</dt>
-                    <dd className="mt-1">{reviewNote.reviewCount}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-slate-500">Last reviewed</dt>
-                    <dd className="mt-1">{reviewNote.lastReviewedAt?.slice(0, 10)}</dd>
+                    <dd className="mt-1">{reviewSummary.confidence ?? "—"} / 5</dd>
                   </div>
                   <div>
                     <dt className="font-medium text-slate-500">Next review</dt>
-                    <dd className="mt-1">{reviewNote.nextReviewAt?.slice(0, 10)}</dd>
+                    <dd className="mt-1">{reviewSummary.nextReviewDate || "Not scheduled"}</dd>
                   </div>
                 </dl>
+                <div>
+                  <p className="font-medium text-slate-500">Freeform notes</p>
+                  <p className="mt-2 leading-7">
+                    {reviewSummary.freeformNotes || "Not recorded yet."}
+                  </p>
+                </div>
               </div>
             ) : (
               <p className="text-sm leading-7 text-slate-600">
@@ -131,6 +169,16 @@ export function ProblemDetailContent({
                 adding editing interactions.
               </p>
             )}
+          </Card>
+
+          <Card
+            title="Edit review notes"
+            subtitle="These notes are saved locally by problem slug and override mock notes when present."
+          >
+            <ReviewNotesForm
+              key={slug}
+              initialNote={buildInitialLocalReviewNote(slug, localReviewNote ?? reviewNote)}
+            />
           </Card>
         </div>
       </div>
@@ -194,14 +242,13 @@ export function ProblemDetailContent({
 
         <div className="space-y-6">
           <Card
-            title="Review note"
-            subtitle="Review fields are not available yet for synced-only problems."
+            title="Edit review notes"
+            subtitle="These notes are saved locally by problem slug for synced-only problems too."
           >
-            <p className="text-sm leading-7 text-slate-600">
-              This detail page is derived from the latest local sync preview. Difficulty, topics,
-              and manual review notes will remain empty until a fuller tracked-problem model is
-              added.
-            </p>
+            <ReviewNotesForm
+              key={slug}
+              initialNote={buildInitialLocalReviewNote(slug, localReviewNote)}
+            />
           </Card>
         </div>
       </div>

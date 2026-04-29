@@ -90,6 +90,31 @@ export type ReviewNote = {
   updatedAt: string;
 };
 
+export type LocalReviewNote = {
+  problemSlug: string;
+  confidence: Confidence | null;
+  mistakeType: MistakeType | "";
+  pattern: Pattern | "";
+  coreIdea: string;
+  whyMissed: string;
+  keyTakeaway: string;
+  nextReviewDate: string;
+  freeformNotes: string;
+  updatedAt: string;
+};
+
+export type ReviewNoteSummary = {
+  confidence: Confidence | null;
+  mistakeType: string;
+  pattern: string;
+  coreIdea: string;
+  whyMissed: string;
+  keyTakeaway: string;
+  nextReviewDate: string;
+  freeformNotes: string;
+  updatedAt?: string;
+};
+
 export type ReviewSession = {
   id: string;
   problemSlug: string;

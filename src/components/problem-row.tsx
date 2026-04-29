@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 import { Badge } from "@/components/badge";
-import type { ProblemWithReview } from "@/lib/types";
+import { getReviewNoteSummary } from "@/lib/local-review-notes";
+import type { LocalReviewNote, ProblemWithReview } from "@/lib/types";
 
 function difficultyTone(difficulty: ProblemWithReview["difficulty"]) {
   if (difficulty === "Easy") {
@@ -13,7 +14,7 @@ function difficultyTone(difficulty: ProblemWithReview["difficulty"]) {
   return "hard";
 }
 
-function confidenceTone(confidence?: number) {
+function confidenceTone(confidence?: number | null) {
   if (!confidence) {
     return "neutral";
   }
@@ -26,7 +27,15 @@ function confidenceTone(confidence?: number) {
   return "bad";
 }
 
-export function ProblemRow({ problem }: { problem: ProblemWithReview }) {
+export function ProblemRow({
+  problem,
+  localReviewNote,
+}: {
+  problem: ProblemWithReview;
+  localReviewNote?: LocalReviewNote;
+}) {
+  const reviewNote = getReviewNoteSummary(localReviewNote, problem.reviewNote);
+
   return (
     <Link
       href={`/problems/${problem.slug}`}
@@ -42,17 +51,17 @@ export function ProblemRow({ problem }: { problem: ProblemWithReview }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Badge tone={confidenceTone(problem.reviewNote?.confidence)}>
-          Confidence {problem.reviewNote?.confidence ?? "—"}
+        <Badge tone={confidenceTone(reviewNote.confidence)}>
+          Confidence {reviewNote.confidence ?? "—"}
         </Badge>
-        <Badge>{problem.reviewNote?.mistakeType ?? "No notes yet"}</Badge>
-        <Badge>{problem.reviewNote?.pattern ?? "No pattern tagged"}</Badge>
+        <Badge>{reviewNote.mistakeType || "No notes yet"}</Badge>
+        <Badge>{reviewNote.pattern || "No pattern tagged"}</Badge>
       </div>
 
       <div className="text-sm leading-6 text-slate-600 md:text-right">
         <p>Next review</p>
         <p className="font-medium text-slate-900">
-          {problem.reviewNote?.nextReviewAt?.slice(0, 10) ?? "Not scheduled"}
+          {reviewNote.nextReviewDate || "Not scheduled"}
         </p>
       </div>
     </Link>

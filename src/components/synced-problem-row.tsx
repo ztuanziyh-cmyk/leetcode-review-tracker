@@ -1,13 +1,18 @@
 import Link from "next/link";
 
 import { Badge } from "@/components/badge";
-import type { SyncedTrackedProblem } from "@/lib/types";
+import { getReviewNoteSummary } from "@/lib/local-review-notes";
+import type { LocalReviewNote, SyncedTrackedProblem } from "@/lib/types";
 
 export function SyncedProblemRow({
   problem,
+  localReviewNote,
 }: {
   problem: SyncedTrackedProblem;
+  localReviewNote?: LocalReviewNote;
 }) {
+  const reviewNote = getReviewNoteSummary(localReviewNote);
+
   return (
     <Link
       href={`/problems/${problem.slug}`}
@@ -27,15 +32,18 @@ export function SyncedProblemRow({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Badge tone={problem.latestStatus === "Accepted" ? "good" : "warn"}>
-          Latest: {problem.latestStatus}
+        <Badge tone={reviewNote.confidence ? "good" : "neutral"}>
+          Confidence {reviewNote.confidence ?? "—"}
         </Badge>
-        <Badge>Review notes unavailable</Badge>
+        <Badge>{reviewNote.mistakeType || problem.latestStatus}</Badge>
+        <Badge>{reviewNote.pattern || "No pattern tagged"}</Badge>
       </div>
 
       <div className="text-sm leading-6 text-slate-600 md:text-right">
-        <p>Latest submitted</p>
-        <p className="font-medium text-slate-900">{problem.latestSubmittedAt.slice(0, 16)}</p>
+        <p>{reviewNote.nextReviewDate ? "Next review" : "Latest submitted"}</p>
+        <p className="font-medium text-slate-900">
+          {reviewNote.nextReviewDate || problem.latestSubmittedAt.slice(0, 16)}
+        </p>
       </div>
     </Link>
   );
