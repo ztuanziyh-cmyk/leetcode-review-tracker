@@ -112,3 +112,15 @@ export type ProblemWithReview = Problem & {
   reviewNote?: ReviewNote;
   latestSubmission?: Submission;
 };
+
+export type SyncedTrackedProblem = {
+  id: string;
+  title: string;
+  slug: string;
+  difficulty: "Unknown";
+  topics: string[];
+  latestStatus: string;
+  latestSubmittedAt: string;
+  status: "accepted" | "attempted";
+  source: "local-sync";
+};
