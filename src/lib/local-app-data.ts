@@ -16,14 +16,16 @@ import {
 export type LocalAppBackup = {
   version: 1;
   exportedAt: string;
-  data: {
-    latestSyncResult: ReturnType<typeof readLocalSyncResult>;
-    reviewNotes: ReturnType<typeof readLocalReviewNotes>;
-    reviewHistory: ReturnType<typeof readLocalReviewHistory>;
-  };
+  data: LocalAppDataSnapshot;
 };
 
-export function readLocalAppData() {
+export type LocalAppDataSnapshot = {
+  latestSyncResult: ReturnType<typeof readLocalSyncResult>;
+  reviewNotes: ReturnType<typeof readLocalReviewNotes>;
+  reviewHistory: ReturnType<typeof readLocalReviewHistory>;
+};
+
+export function readLocalAppData(): LocalAppDataSnapshot {
   return {
     latestSyncResult: readLocalSyncResult(),
     reviewNotes: readLocalReviewNotes(),
@@ -31,12 +33,19 @@ export function readLocalAppData() {
   };
 }
 
-export function buildLocalAppBackup(): LocalAppBackup {
+export function buildLocalAppBackupFromData(
+  data: LocalAppDataSnapshot,
+  exportedAt = new Date().toISOString(),
+): LocalAppBackup {
   return {
     version: 1,
-    exportedAt: new Date().toISOString(),
-    data: readLocalAppData(),
+    exportedAt,
+    data,
   };
+}
+
+export function buildLocalAppBackup(): LocalAppBackup {
+  return buildLocalAppBackupFromData(readLocalAppData());
 }
 
 export function getBackupFilename(date = new Date()) {
