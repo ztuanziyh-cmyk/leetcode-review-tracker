@@ -1,24 +1,29 @@
 # LeetCode Review Tracker
 
-LeetCode Review Tracker is a Next.js app for turning public LeetCode activity into a lightweight review workflow. It syncs a public username, derives a problem list from recent submissions, enriches those problems with metadata, and lets you manage review notes and spaced-repetition style follow-ups locally in the browser.
+This is a personal LeetCode review tracker built as a vibe coding project.
 
-## Current Features
+The app helps track solved problems, review notes, weak topics, and daily review. It turns public LeetCode activity into a lightweight review workflow by syncing a public username, importing recent submissions, enriching problem metadata, and managing review progress locally in the browser with optional cloud backup.
+
+## Core Features
 
 - Public LeetCode username sync
-- `localStorage` persistence
-- Derived problem list from recent submissions
-- Enriched problem metadata with difficulty and topics
+- Recent submissions tracking
+- Problem metadata enrichment
 - Local review notes
-- Review state
-- Review result logging
+- Review state and review history
 - Automatic next review scheduling
-- Review history
+- Search, filter, and sort
+- Real stats
+- JSON export/import
+- Supabase cloud backup/restore
+- Vercel deployment
 
 ## Tech Stack
 
 - Next.js App Router
 - TypeScript
 - Tailwind CSS
+- Supabase
 - `localStorage`
 - LeetCode public GraphQL
 
@@ -30,6 +35,15 @@ npm run dev
 ```
 
 Open `http://localhost:3000`.
+
+## Environment Variables
+
+Create a local environment file and configure:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+```
 
 ## Usage Flow
 
@@ -44,19 +58,15 @@ Open `http://localhost:3000`.
 
 - No LeetCode password
 - No cookies
-- No Supabase yet
-- Data is stored locally in the browser
+- Data is stored locally in the browser by default
+- Optional Supabase backup/restore uses your configured public client keys
 
 ## Current Limitations
 
 - Only recent public submissions are synced
-- Data is local to one browser
+- Supabase cloud backup/restore is manual, not automatic sync yet
 - No account login yet
 
-## Roadmap
+## Vibe Coding Note
 
-- Filters and search
-- Real stats from notes and topics
-- Export/import backup
-- Supabase persistence
-- Deployment
+This project was developed through an iterative vibe coding workflow: design the feature, ask Codex to implement a small phase, test locally, commit, and deploy.
