@@ -9,6 +9,12 @@ import { SyncedProblemRow } from "@/components/synced-problem-row";
 import { getReviewNoteSummary } from "@/lib/local-review-notes";
 import { deriveTrackedProblemsFromSync } from "@/lib/local-synced-problems";
 import { getProblemsList } from "@/lib/review-logic";
+import type {
+  LocalReviewNote,
+  ProblemWithReview,
+  ReviewNoteSummary,
+  SyncedTrackedProblem,
+} from "@/lib/types";
 import { useLocalReviewNotes } from "@/lib/use-local-review-notes";
 import { useLocalSyncResult } from "@/lib/use-local-sync-result";
 
@@ -28,6 +34,126 @@ const difficultyOrder: Record<string, number> = {
   Unknown: 3,
 };
 
+type ProblemListItem<TProblem extends { title: string; slug: string; difficulty: string; topics: string[] }> = {
+  problem: TProblem;
+  reviewSummary: ReviewNoteSummary;
+  searchText: string;
+  latestSubmittedAt: string;
+  difficulty: string;
+  topics: string[];
+};
+
+function buildSyncedProblemItems(
+  problems: SyncedTrackedProblem[],
+  localReviewNotes: Record<string, LocalReviewNote>,
+): ProblemListItem<SyncedTrackedProblem>[] {
+  return problems.map((problem) => ({
+    problem,
+    reviewSummary: getReviewNoteSummary(localReviewNotes[problem.slug]),
+    searchText: `${problem.title} ${problem.slug}`.toLowerCase(),
+    latestSubmittedAt: problem.latestSubmittedAt,
+    difficulty: problem.difficulty,
+    topics: problem.topics,
+  }));
+}
+
+function buildFallbackProblemItems(
+  problems: ProblemWithReview[],
+  localReviewNotes: Record<string, LocalReviewNote>,
+): ProblemListItem<ProblemWithReview>[] {
+  return problems.map((problem) => ({
+    problem,
+    reviewSummary: getReviewNoteSummary(localReviewNotes[problem.slug], problem.reviewNote),
+    searchText: `${problem.title} ${problem.slug}`.toLowerCase(),
+    latestSubmittedAt:
+      problem.latestSubmission?.submittedAt ?? problem.lastSolvedAt ?? "",
+    difficulty: problem.difficulty,
+    topics: problem.topics,
+  }));
+}
+
+function filterAndSortProblems<TProblem extends { title: string; slug: string; difficulty: string; topics: string[] }>(
+  problems: ProblemListItem<TProblem>[],
+  filters: {
+    search: string;
+    difficultyFilter: string;
+    topicFilter: string;
+    reviewStateFilter: string;
+    confidenceFilter: string;
+    mistakeTypeFilter: string;
+    patternFilter: string;
+    sortBy: (typeof sortOptions)[number];
+  },
+): ProblemListItem<TProblem>[] {
+  return problems
+    .filter((item) =>
+      filters.search ? item.searchText.includes(filters.search.trim().toLowerCase()) : true,
+    )
+    .filter((item) =>
+      filters.difficultyFilter === "All" ? true : item.difficulty === filters.difficultyFilter,
+    )
+    .filter((item) =>
+      filters.topicFilter === "All" ? true : item.topics.includes(filters.topicFilter),
+    )
+    .filter((item) =>
+      filters.reviewStateFilter === "All"
+        ? true
+        : item.reviewSummary.reviewState === filters.reviewStateFilter,
+    )
+    .filter((item) => {
+      if (filters.confidenceFilter === "All") {
+        return true;
+      }
+      if (filters.confidenceFilter === "Missing") {
+        return item.reviewSummary.confidence === null;
+      }
+      return String(item.reviewSummary.confidence ?? "") === filters.confidenceFilter;
+    })
+    .filter((item) =>
+      filters.mistakeTypeFilter === "All"
+        ? true
+        : item.reviewSummary.mistakeType === filters.mistakeTypeFilter,
+    )
+    .filter((item) =>
+      filters.patternFilter === "All"
+        ? true
+        : item.reviewSummary.pattern === filters.patternFilter,
+    )
+    .sort((left, right) => {
+      if (filters.sortBy === "Title A-Z") {
+        return left.problem.title.localeCompare(right.problem.title);
+      }
+
+      if (filters.sortBy === "Difficulty") {
+        return (
+          difficultyOrder[left.difficulty] - difficultyOrder[right.difficulty] ||
+          left.problem.title.localeCompare(right.problem.title)
+        );
+      }
+
+      if (filters.sortBy === "Confidence low to high") {
+        return (
+          (left.reviewSummary.confidence ?? 99) -
+            (right.reviewSummary.confidence ?? 99) ||
+          left.problem.title.localeCompare(right.problem.title)
+        );
+      }
+
+      if (filters.sortBy === "Next review date") {
+        return (
+          (left.reviewSummary.nextReviewDate || "9999-99-99").localeCompare(
+            right.reviewSummary.nextReviewDate || "9999-99-99",
+          ) || left.problem.title.localeCompare(right.problem.title)
+        );
+      }
+
+      return (
+        right.latestSubmittedAt.localeCompare(left.latestSubmittedAt) ||
+        left.problem.title.localeCompare(right.problem.title)
+      );
+    });
+}
+
 export function ProblemsOverview() {
   const storedSync = useLocalSyncResult();
   const localReviewNotes = useLocalReviewNotes();
@@ -43,25 +169,20 @@ export function ProblemsOverview() {
   const [sortBy, setSortBy] =
     useState<(typeof sortOptions)[number]>("Latest submitted");
 
-  const sourceProblems = usingLiveData ? syncedProblems : fallbackProblems;
-  const enrichedProblems = sourceProblems.map((problem) => {
-    const reviewSummary = getReviewNoteSummary(
-      localReviewNotes[problem.slug],
-      "reviewNote" in problem ? problem.reviewNote : undefined,
-    );
+  const filters = {
+    search,
+    difficultyFilter,
+    topicFilter,
+    reviewStateFilter,
+    confidenceFilter,
+    mistakeTypeFilter,
+    patternFilter,
+    sortBy,
+  };
 
-    return {
-      problem,
-      reviewSummary,
-      searchText: `${problem.title} ${problem.slug}`.toLowerCase(),
-      latestSubmittedAt:
-        "latestSubmittedAt" in problem
-          ? problem.latestSubmittedAt
-          : (problem.latestSubmission?.submittedAt ?? problem.lastSolvedAt ?? ""),
-      difficulty: problem.difficulty,
-      topics: problem.topics,
-    };
-  });
+  const syncedProblemItems = buildSyncedProblemItems(syncedProblems, localReviewNotes);
+  const fallbackProblemItems = buildFallbackProblemItems(fallbackProblems, localReviewNotes);
+  const enrichedProblems = usingLiveData ? syncedProblemItems : fallbackProblemItems;
 
   const availableTopics = [...new Set(enrichedProblems.flatMap((item) => item.topics))].sort();
   const availableMistakeTypes = [
@@ -79,71 +200,11 @@ export function ProblemsOverview() {
     ),
   ].sort();
 
-  const filteredProblems = enrichedProblems
-    .filter((item) =>
-      search ? item.searchText.includes(search.trim().toLowerCase()) : true,
-    )
-    .filter((item) =>
-      difficultyFilter === "All" ? true : item.difficulty === difficultyFilter,
-    )
-    .filter((item) =>
-      topicFilter === "All" ? true : item.topics.includes(topicFilter),
-    )
-    .filter((item) =>
-      reviewStateFilter === "All"
-        ? true
-        : item.reviewSummary.reviewState === reviewStateFilter,
-    )
-    .filter((item) => {
-      if (confidenceFilter === "All") {
-        return true;
-      }
-      if (confidenceFilter === "Missing") {
-        return item.reviewSummary.confidence === null;
-      }
-      return String(item.reviewSummary.confidence ?? "") === confidenceFilter;
-    })
-    .filter((item) =>
-      mistakeTypeFilter === "All"
-        ? true
-        : item.reviewSummary.mistakeType === mistakeTypeFilter,
-    )
-    .filter((item) =>
-      patternFilter === "All" ? true : item.reviewSummary.pattern === patternFilter,
-    )
-    .sort((left, right) => {
-      if (sortBy === "Title A-Z") {
-        return left.problem.title.localeCompare(right.problem.title);
-      }
-
-      if (sortBy === "Difficulty") {
-        return (
-          difficultyOrder[left.difficulty] - difficultyOrder[right.difficulty] ||
-          left.problem.title.localeCompare(right.problem.title)
-        );
-      }
-
-      if (sortBy === "Confidence low to high") {
-        return (
-          (left.reviewSummary.confidence ?? 99) -
-            (right.reviewSummary.confidence ?? 99) ||
-          left.problem.title.localeCompare(right.problem.title)
-        );
-      }
-
-      if (sortBy === "Next review date") {
-        return (
-          (left.reviewSummary.nextReviewDate || "9999-99-99").localeCompare(
-            right.reviewSummary.nextReviewDate || "9999-99-99",
-          ) || left.problem.title.localeCompare(right.problem.title)
-        );
-      }
-
-      return (
-        right.latestSubmittedAt.localeCompare(left.latestSubmittedAt) ||
-        left.problem.title.localeCompare(right.problem.title)
-      );
-    });
+  const filteredSyncedProblems = filterAndSortProblems(syncedProblemItems, filters);
+  const filteredFallbackProblems = filterAndSortProblems(fallbackProblemItems, filters);
+  const filteredProblems = usingLiveData
+    ? filteredSyncedProblems
+    : filteredFallbackProblems;
 
   function resetFilters() {
     setSearch("");
@@ -279,21 +340,21 @@ export function ProblemsOverview() {
 
       {filteredProblems.length ? (
         <div className="space-y-4">
-          {filteredProblems.map((item) =>
-            usingLiveData ? (
+          {usingLiveData
+            ? filteredSyncedProblems.map((item) => (
               <SyncedProblemRow
                 key={item.problem.slug}
                 problem={item.problem}
                 localReviewNote={localReviewNotes[item.problem.slug]}
               />
-            ) : (
+            ))
+            : filteredFallbackProblems.map((item) => (
               <ProblemRow
                 key={item.problem.slug}
                 problem={item.problem}
                 localReviewNote={localReviewNotes[item.problem.slug]}
               />
-            ),
-          )}
+            ))}
         </div>
       ) : (
         <Card title="No matching problems" subtitle="Try broadening the filters or resetting them.">

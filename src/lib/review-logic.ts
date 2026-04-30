@@ -68,7 +68,7 @@ function scoreReviewItem(problem: ProblemWithReview, weakTopics: string[]) {
     reasons.push("Touches a weak topic");
   }
 
-  if (reviewNote && reviewNote.mistakeType !== "None") {
+  if (reviewNote && reviewNote.mistakeType) {
     priorityScore += 1;
     reasons.push(reviewNote.mistakeType);
   }
